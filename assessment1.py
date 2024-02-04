@@ -9,12 +9,11 @@ profit = [25, 15, 30, 17, 7, 10, 20]
 
 #states
 last_arrival_index = 0
-#B1 = B2 = B3 = 0
-#B = [{'table_number': i, 'time': 0} for i in range(1, num_tables + 1)]
 tables = [{'size': size, 'occupied': False, 'departure': 61} for size in table_sizes]
 
 #event calendar
-TNOW = arrival = arrival_time[last_arrival_index]
+arrival = arrival_time[last_arrival_index]
+TNOW = 0
 departure1 = departure2 = departure3 = 61
 termination = 60  
 
@@ -40,24 +39,25 @@ while TNOW < termination:
     else:
         print("ARRIVAL at time", TNOW)
         # Customer Arrival
-        group_size = groups[last_arrival_index]
+        group_size = groups[last_arrival_index -1]
         last_arrival_index += 1
 
         # Finding available table
         table_found = False
-        if not table['occupied'] and table['size'] >= group_size:
-            for i, table in enumerate(tables):
-            # Assign the group to this table
-            tables[i]['occupied'] = True
-            tables[i]['departure'] = TNOW + stay_time[last_arrival_index-1]
-            print("the group that arrived at", arrival, "will leave at", tables[i]['departure'])
+
+        for i, table in enumerate(tables):
+            if not table['occupied'] and table['size'] >= group_size:
+                # Assign the group to this table
+                tables[i]['occupied'] = True
+                tables[i]['departure'] = TNOW + stay_time[last_arrival_index-1]
+                print("the group that arrived at", arrival, "will leave at", tables[i]['departure'])
 
 
-            #table_utilization[table['size']] += group_size / table['size']
-            total_profit += profit[last_arrival_index - 1]
-            table_found = True
-            print("the group arriving has", group_size, "people and will sit at table", table['size'])
-            break
+                #table_utilization[table['size']] += group_size / table['size']
+                total_profit += profit[last_arrival_index - 1]
+                table_found = True
+                print("the group arriving has", group_size, "people and will sit at table", table['size'])
+                break
 
             #this is the special case when the group 3 splits
             elif not tables[0]['occupied'] and not tables[1]['occupied'] and tables[2]['occupied'] and group_size == 3: 
@@ -73,8 +73,6 @@ while TNOW < termination:
                 table_found = True
 
                 break
-            else:
-                continue
     
         arrival = TNOW + arrival_time[last_arrival_index]
         TNOW = arrival
