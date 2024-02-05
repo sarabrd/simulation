@@ -1,3 +1,4 @@
+import numpy as np
 
 # Constants
 num_tables = 3
@@ -16,7 +17,13 @@ Termination = 60   #to change
 T_plus = Termination + 1
 EC =  [T_plus, T_plus, T_plus, arrival_time[current_arrival_index], 60] #event calendar: departure1, departure2, departure3, arrival, termination
 
+#kpis
+total_profit = 0
+utilization = [0,0,0]
+difference = [0,0,0]
+
 while TNOW <= Termination:
+    print("---------------------")
     print(TNOW, ",",TNEXT, ",", B, ",",EC)
     minimum_value = min(EC)
 
@@ -38,12 +45,15 @@ while TNOW <= Termination:
             if table >= groups[current_arrival_index] and B[i] == 0:
                 B[i] = 1
                 EC[i] = EC[3] + stay_time[current_arrival_index]
+                total_profit += profit[current_arrival_index]
+                utilization[i] += stay_time[current_arrival_index]
                 break
 
             #combining tables
             elif B[0] == 0 and B[1] == 0 and B[2] == 1 and groups[current_arrival_index] == 3:
                 B[0] = B[1] = 1
                 EC[0] = EC[1] = EC[3] + stay_time[current_arrival_index]
+                total_profit += profit[current_arrival_index]
 
         #schedule a new arrival  
         EC[3] += arrival_time[current_arrival_index+1]  
@@ -52,6 +62,17 @@ while TNOW <= Termination:
 
     else:
         print("terminantion")
+        print("total profit", total_profit)
+
+        #still remove utilization of those that haven't left yet
+        for i, b in enumerate(B):
+            if b == 1:
+                difference[i] = EC[i] - Termination
+                utilization[i] = utilization[i] - difference[i]
+
+        utilization = np.array(utilization, dtype=float)  # Convert to floating-point type
+        utilization /= Termination
+        print("utilization", utilization)
         break
 
     
